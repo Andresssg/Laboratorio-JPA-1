@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -52,6 +53,7 @@ public class CompetitorService {
     @POST
     @Path("/add")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response createCompetitor(CompetitorDTO competitor) {
 
         Competitor competitorTmp = new Competitor();
@@ -65,7 +67,7 @@ public class CompetitorService {
         competitorTmp.setTelephone(competitor.getTelephone());
 
         entityManager.getTransaction().begin();
-        entityManager.persist(competitor);
+        entityManager.persist(competitorTmp);
         entityManager.getTransaction().commit();
         entityManager.refresh(competitorTmp);
 
