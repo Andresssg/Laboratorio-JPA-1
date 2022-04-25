@@ -8,9 +8,11 @@ package com.example.services;
 import com.example.PersistenceManager;
 import com.example.models.Competitor;
 import com.example.models.CompetitorDTO;
+import com.example.models.Login;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.ws.rs.Consumes;
@@ -58,6 +60,7 @@ public class CompetitorService {
 
         Competitor competitorTmp = new Competitor();
         competitorTmp.setAddress(competitor.getAddress());
+        competitorTmp.setPassword(competitor.getPassword());
         competitorTmp.setAge(competitor.getAge());
         competitorTmp.setCellphone(competitor.getCellphone());
         competitorTmp.setCity(competitor.getCity());
@@ -72,6 +75,29 @@ public class CompetitorService {
         entityManager.refresh(competitorTmp);
 
         return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(competitorTmp).build();
+    }
+
+    @POST
+    @Path("/login")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response login(Login loginDatos) {
+        String consulta = "SELECT u FROM Competitor u WHERE u.address = '" + loginDatos.getAddress() + "'";
+        Query q = entityManager.createQuery(consulta);
+        List<Competitor> x = q.getResultList();
+        Competitor competitorTmp = null;
+
+        try {
+            competitorTmp = (Competitor) q.getSingleResult();
+        } catch (NoResultException e) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("NotAuthorizedException").build();
+        }
+
+        String passwordCompetitorDB = competitorTmp.getPassword();
+        if (passwordCompetitorDB.equals(loginDatos.getPassword())) {
+            return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(competitorTmp).build();
+        }
+        return Response.status(Response.Status.UNAUTHORIZED).entity("NotAuthorizedException").build();
     }
 
 }
